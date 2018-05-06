@@ -27,8 +27,7 @@ typedef struct RationalNumber{
 
 /*Kollar om ett rationellt tal är negativt.
   Returnerar 0 om neg och 1 annars*/
-// Gör inte denna tvärtemot? 
-int isRationalNumberNegative(RationalNumber rn){  
+int isRationalNumberNegative(RationalNumber rn){
   if(rn.numerator > 0 && rn.denumerator > 0){
     return 0;
   }
@@ -230,7 +229,7 @@ RationalMatrix* sort(RationalMatrix* rm, int rows, int cols){
 
   sort(rm, rows,cols);
 
-  printf("Andra kolonnen efter sortering:\n");
+  printf("Försra kolonnen efter sortering:\n");
   //rearrangeRationalMatrix(rm, 0, rows);
   printFirstCol(rm);
 
