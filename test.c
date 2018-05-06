@@ -152,7 +152,6 @@ void* printFirstCol(RationalMatrix* rm){
    var sin egen matris och sen lägger ihop den i orginalmatrisen.
    Tror den har tidskomplexitet O(n)
    */
-}
 RationalMatrix* sort(RationalMatrix* rm, int rows, int cols){
   int i;
   int zercount = 0;
