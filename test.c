@@ -3,7 +3,39 @@
 #define ARRAYSIZE(A) (sizeof(A) / sizeof(A[0]))
 
 
-void printMatrix (int matrix[][2], int rows, int cols){
+/* --- innehållsförteckning---*/
+/*  1. printMatrix (skriver ut en int matris)
+    2. struct RationalNumber (sparar rationella tal som numerator och denumerator)
+      2.1 isRationalNumberZero (kollar om RationalNumber är = 0)
+      2.2 isRationalNumberNegative (kollar om RationalNumber är < 0)
+      2.3 isRationalNumberPositive (kollar om RationalNumber är > 0)
+      2.4 reduce (reducerar RationalNumber till minsta nämnare)
+      2.5 addq (från lab1)
+      2.6 subq (från lab1)
+      2.7 multq (från lab1)
+      2.8 divq (från lab1)
+    3. struct RationalMatrix (sparar antal rader och kolonner samt en pekarvektor till en pekarvektor som pekar på ett Rationellt tal. Alltså en matris med rationella tal)
+      3.1 make_rationalMatrix (allokerar minne i heapen till en rationell matris)
+      3.2 print_rationalMatrix (Skriver ut en rationell matris)
+      3.3 convertToRationlNumbers (Gör om en intMatris till en matris med rationella tal)
+      3.4 printFirstCol (Skirver bara ut första kolonnen i matrisen, brukar inte använda denna)
+      3.5 assemRationallMatrices(Jämför varje pos rad med varje neg rad i 2 rationella matriser när vi ställer upp olikheterna för pos och neg)
+      3.6 divFirstRow (dividerar alla rationella tal i en rad med första rationella talet i raden, gör detta för en hel matris)
+      3.7 freeFirstCol (byter tecken på alla rationella tal i en rad utom det första, vilket motsvara att flytta till andra sidan likhetstecknet)
+      3.8 eliminateFirstCol (tar bort första kolonnen ut matrisen)
+      3.9 mergeAandC (Lägger ihop matriserna A och C)
+    4. struct RationalMatrices (Är till för att spara de tre matriserna som har pos, neg eller zer i första kolonnen)
+      4.1 sort (Sorterar talen så poitiva på toppen sen negativa och sist nollelement, ger de tre matriserna samt antal npos nneg och nzer)'
+    5. compareMax (Jämför 2 rationella tal och returnerar 1 om det första man skickar in är störst)
+       compareMin (Jämför 2 rationella tal och returnerar 1 om det första man skickar in är minst)
+    6. findMin (Hittar det minsta talet i kolonn 2 i en rationell matris, används för att hitta B1)
+       findMax (Hittar det största talet i kolonn 2 i en rationell matris, används för att hitta b1)
+
+
+
+
+/* SKriver ut en matris*/
+void printMatrix (int rows, int cols, int matrix[][cols]){
   int i, j;
 
   for(i = 0; i < rows; i++)
@@ -25,17 +57,98 @@ typedef struct RationalNumber{
   int denumerator;
 }RationalNumber;
 
-/*Kollar om ett rationellt tal är negativt.
-  Returnerar 0 om neg och 1 annars*/
-int isRationalNumberNegative(RationalNumber rn){
-  if(rn.numerator > 0 && rn.denumerator > 0){
-    return 0;
-  }
-  if(rn.numerator < 0 && rn.denumerator < 0){
-    return 0;
-  }
-  return 1;
+int isRationalNumberZero(RationalNumber rn){
+  if(rn.numerator == 0)
+    return 1;
+
+  return 0;
 }
+
+/*Kollar om ett rationellt tal är negativt.
+  Returnerar 1 om neg och 0 annars*/
+int isRationalNumberNegative(RationalNumber rn){
+  if(rn.numerator > 0 && rn.denumerator < 0)
+    return 1;
+  else if(rn.numerator < 0 && rn.denumerator > 0)
+    return 1;
+  else
+    return 0;
+}
+/*Kollar om ett rationellt tal är positivt.
+  Returnerar 1 om pos och 0 annars*/
+int isRationalNumberPositive(RationalNumber rn){
+  if(rn.numerator > 0 && rn.denumerator > 0)
+    return 1;
+  if(rn.numerator < 0 && rn.denumerator < 0)
+    return 1;
+
+  return 0;
+}
+
+/* Räkneregler med rationella tal, från lab1*/
+RationalNumber reduce(RationalNumber r){
+  int a = r.numerator;
+  int b = r.denumerator;
+  int mgn;
+  RationalNumber newr;
+
+
+  int c = a % b;
+
+ if (c < 0){
+  c = -c;
+  a = -a;
+}
+
+  while(c != 0)
+  {
+      a = b;
+      b = c;
+      c = a % b;
+  }
+  mgn = b;
+  newr.numerator = r.numerator/mgn;
+  newr.denumerator = r.denumerator/mgn;
+  return newr;
+};
+
+RationalNumber addq(RationalNumber r1, RationalNumber r2){
+  RationalNumber newrat;
+  newrat.numerator = r1.numerator*r2.denumerator + r2.numerator*r1.denumerator;
+  newrat.denumerator = r1.denumerator*r2.denumerator;
+  newrat = reduce(newrat);
+
+  return newrat;
+}
+
+RationalNumber subq(RationalNumber r1, RationalNumber r2){
+  RationalNumber newrat;
+  newrat.numerator = r1.numerator*r2.denumerator - r2.numerator*r1.denumerator;
+  newrat.denumerator = r1.denumerator*r2.denumerator;
+  //newrat = reduce(newrat);
+
+  return newrat;
+}
+
+RationalNumber mulq(RationalNumber r1, RationalNumber r2){
+  RationalNumber newrat;
+  newrat.numerator = r1.numerator*r2.numerator;
+  newrat.denumerator = r1.denumerator*r2.denumerator;
+  newrat = reduce(newrat);
+
+  return newrat;
+}
+
+RationalNumber divq(RationalNumber r1, RationalNumber r2){
+  RationalNumber newrat;
+  newrat.numerator = r1.numerator*r2.denumerator;
+  newrat.denumerator = r1.denumerator*r2.numerator;
+  newrat = reduce(newrat);
+
+  return newrat;
+}
+
+
 
 /* En strukt som beskriver en matris av rationella tal */
 typedef struct RationalMatrix{
@@ -68,13 +181,14 @@ void print_rationalMatrix(RationalMatrix* rm){
     }
     printf("\n");
   }
+  printf("\n");
 }
 
 /* Funktionen som konverterar matris av ints till rationella tal
    obs! Jag har inte lyckats lösa så att matrisen som man skickar
    kan vara av vilken storlek som helst utan det måste göras manuellt
    för tillfället, därav 2an i int matrix[][2] som inparameter*/
-RationalMatrix* convertToRationlNumbers(int matrix[][2], int rows, int cols){
+RationalMatrix* convertToRationlNumbers(int rows, int cols, int matrix[][cols]){
   int i, j;
   RationalMatrix* rm = make_rationalMatrix(rows, cols);
 
@@ -91,6 +205,7 @@ RationalMatrix* convertToRationlNumbers(int matrix[][2], int rows, int cols){
    Använder oss av mergesort för att sortera listan.
    Komplexitet: O(n log n)*/
 
+
 /* Funktion för att skriva ut första kolonnen i matrisen
    med rationella tal */
 void* printFirstCol(RationalMatrix* rm){
@@ -98,69 +213,115 @@ void* printFirstCol(RationalMatrix* rm){
       printf("%d / %d \n", rm->data[i][0].numerator, rm->data[i][0].denumerator);
   }
 }
-// void merge(RationalMatrix* rm, int l, int m, int r){
-//   int i, j, k;
-//   int n1 = m - l +1;
-//   int n2 = r - m;
-//   // printf("Vi kommer  in i merge %d\n", m);
-//   //Skapar temporära matriser med raionella tal
-//   RationalMatrix* L = make_rationalMatrix(n1, rm->cols);
-//   RationalMatrix* R = make_rationalMatrix(n2, rm->cols);
-//
-//   //Lägger in datan till rat-matriserna L och R
-//   for (i = 0; i < n1; i++)
-//     L->data[i] = rm->data[l+i]; //Kanske inte fungerar att kalla till er rad på det sättet
-//   for (j = 0; j < n2; j++)
-//     R->data[j] = rm->data[m+1+j]; //Kanske inte fungerar att kalla till er rad på det sättet
-//
-//   //Lägger nu tillbaka de temporära rat-matriserna i orginal rat-matrisen
-//   i = j = 0;
-//   // k = l;
-//   // printf("L:\n");
-//   // printFirstCol(L);
-//   // printf("R:\n");
-//   // printFirstCol(R);
-//   // kopierar negativa element från L
-//   while(i < n1 && isRationalNumberNegative(L->data[i][0]))
-//         rm->data[k++] = L->data[i++];
-//   // kopierar negativa element från R
-//   while(j < n2 && isRationalNumberNegative(R->data[j][0]))
-//         rm->data[k++] = R->data[j++];
-//   // kopierar positiva element från L
-//   while(i < n1)
-//         rm->data[k++] = L->data[i++];
-//   // kopierar positiva element från R
-//   while(j < n2)
-//         rm->data[k++] = R->data[j++];
-//
-// }
-//
-// void rearrangeRationalMatrix(RationalMatrix* rm, int l, int r){
-//       if (l < r){
-//           int m = (l + r)/2; //Kan skrivas om som l + (r - l) / 2; stog något om att det annar kunde fucka för stora tal.
-//           //printf("Vi kommer  in i rearr\n");
-//           rearrangeRationalMatrix(rm, l, m);
-//           rearrangeRationalMatrix(rm, m + 1, r);
-//           printFirstCol(rm);
-//           printf("l = %d, m = %d, r = %d\n", l, m, r);
-//           merge(rm, l, m, r);
-//       }
-// }
+
+
+RationalMatrix* assemRationallMatrices(RationalMatrix* rm1, RationalMatrix* rm2){
+
+  int rm1_cols = rm1->cols;
+  int rm2_cols = rm2->cols;
+
+
+  if (rm1_cols == rm2_cols){
+    int rm1_rows = rm1->rows;
+    int rm2_rows = rm2->rows;
+    int new_cols = rm1_cols + rm2_cols;
+    RationalMatrix* new_rm = make_rationalMatrix(rm1_rows + rm2_rows, rm1_cols);
+
+    int i;
+    for(i = 0; i < rm1_rows; i++)
+      new_rm->data[i] = rm1->data[i];
+
+    for(i = 0; i < rm2_rows; i++)
+      new_rm->data[rm1_rows + i] = rm2->data[i];
+
+      return new_rm;
+  }
+}
+
+void* divFirstRow(RationalMatrix* rm){
+  int i, j;
+  int cols = rm->cols;
+  int rows = rm->rows;
+    for (i = 0; i < rows; i++){
+      RationalNumber rn = rm->data[i][0];
+      for(j=0 ; j< cols; j++){
+        rm->data[i][j] = divq(rm->data[i][j], rn);
+      }
+  }
+}
+
+void* freeFirstCol(RationalMatrix* rm){
+  int i, j;
+  int cols = rm->cols;
+  int rows = rm->rows;
+    for (i = 0; i < rows; i++){
+      for(j=1 ; j< cols; j++){
+        rm->data[i][j].numerator = - rm->data[i][j].numerator;
+      }
+  }
+}
+
+RationalMatrix* eliminateFirstCol(RationalMatrix* old_rm, RationalMatrix* rm_zer, int npos, int nneg, int nzer){
+  int i,j,k;
+  int cols = old_rm->cols;
+  int new_rows = npos * nneg + nzer;
+  RationalMatrix* new_rm = make_rationalMatrix(new_rows, cols-1);
+
+  for(i = 0; i < npos; i++){
+    for (k = 0; k < nneg; k++){
+        for(j = 0; j < cols-1; j++)
+          new_rm->data[i*nneg+k][j] = subq(old_rm->data[i][j+1], old_rm->data[npos+k][j+1]);
+    }
+  }
+
+  if(nzer > 0){
+    for(i = 0; i < nzer; i++){
+      for(j = 1; j < cols; j++){
+        RationalNumber rn = rm_zer->data[i][j];
+        rn.numerator = - rn.numerator;
+        new_rm->data[npos * nneg + i][j-1] = rn;
+        //new_rm->data[npos + nneg + 1 + i][j] = rm_zer->data[i][j];
+      }
+    }
+  }
+  return new_rm;
+}
+
+RationalMatrix* mergeAandC(RationalMatrix* A, RationalMatrix* C){
+  int i;
+  int cols = A->cols;
+  int rows = A->rows;
+
+  RationalMatrix* AC = make_rationalMatrix(rows, cols + 1);
+
+  for(i = 0; i < rows; i++){
+    AC->data[i] = A->data[i];
+    AC->data[i][cols] = C->data[i][0];
+  }
+  return AC;
+}
+
+typedef struct RationalMatrices{
+  RationalMatrix* rm_zer;
+  RationalMatrix* rm_neg;
+  RationalMatrix* rm_pos;
+}RationalMatrices;
 
 
 /* Här är sortering funktionen, den lägger alla pos, neg, zer i
    var sin egen matris och sen lägger ihop den i orginalmatrisen.
+   Funktionen sorterar första kolonnen och returnerar zercount,
+   negcount och poscount i en vektor som heter counters.
    Tror den har tidskomplexitet O(n)
    */
-RationalMatrix* sort(RationalMatrix* rm, int rows, int cols){
+void* sort(RationalMatrix* rm, int rows, int cols, int *counters, RationalMatrices *rms){
   int i;
   int zercount = 0;
   int negcount = 0;
   int poscount = 0;
 
-
   //Beräknar antalet pos, neg och zer element i första kolonnen för att kunna skapa matriserna
-  for( i=0; i < rows; i++){
+  for( i = 0; i < rows; i++){
     if (rm->data[i][0].numerator == 0)
       zercount++;
     else if (isRationalNumberNegative(rm->data[i][0]))
@@ -170,31 +331,37 @@ RationalMatrix* sort(RationalMatrix* rm, int rows, int cols){
   }
 
 
-  //Skapar/allocerar minna för tre stycken matriser att lägga pos, neg och zer elementen i
-  int rm_cols = rm->cols;
+  //Skapar/allocerar minne för tre stycken matriser att lägga pos, neg och zer elementen i
+    int rm_cols = rm->cols;
 
-  RationalMatrix* rm_zer = make_rationalMatrix(zercount, rm_cols);
+    RationalMatrix* rm_zer = make_rationalMatrix(zercount, rm_cols);
   // if (negcount>0)
-  RationalMatrix* rm_neg = make_rationalMatrix(negcount, rm_cols);
+    RationalMatrix* rm_neg = make_rationalMatrix(negcount, rm_cols);
   // if (poscount>0)
-  RationalMatrix* rm_pos = make_rationalMatrix(poscount, rm_cols);
+    RationalMatrix* rm_pos = make_rationalMatrix(poscount, rm_cols);
 
-  int j,k,l = 0;
+    int j,k,l = 0;
   //Lägger in pos, neg och zer rader i sina respektive matriser
-  for( i = 0; i < rows; i++){
-    if (rm->data[i][0].numerator == 0){
-      rm_zer->data[j] = rm->data[i];
-      j++;
+
+    for( i = 0; i < rows; i++){
+      RationalNumber temp = rm->data[i][0];
+
+      if(temp.numerator == 0){
+        rm_zer->data[j] = rm->data[i];
+        j++;
+      }
+      else if(isRationalNumberNegative(temp)){
+        rm_neg->data[k] = rm->data[i];
+        k++;
+      }
+      else {
+        rm_pos->data[l] = rm->data[i];
+        l++;
+      }
     }
-    else if (isRationalNumberNegative(rm->data[i][0])){
-      rm_neg->data[k] = rm->data[i];
-      k++;
-    }
-    else {
-      rm_pos->data[l] = rm->data[i];
-      l++;
-    }
-  }
+    rms->rm_zer = rm_zer;
+    rms->rm_neg = rm_neg;
+    rms->rm_pos = rm_pos;
 
   //Lägger in elementen igen i matrisen rm, fast i rätt ordning
   for(i = 0; i<poscount; i++)
@@ -203,34 +370,245 @@ RationalMatrix* sort(RationalMatrix* rm, int rows, int cols){
     rm->data[poscount + i] = rm_neg->data[i];
     //Kan vara så att vi kan skita i den här loopen kommer inte ihåg ifall vi ändå ska ta bort 0elementen dirrekt efter detta
   for(i = 0; i<zercount; i++)
-    rm->data[poscount + negcount + i] = rm_neg->data[i];
+    rm->data[poscount + negcount + i] = rm_zer->data[i];
 
-  return rm;
+  // counters = {zercount, negcount, poscount};
+  counters[0] = zercount;
+  counters[1] = negcount;
+  counters[2] = poscount;
+
 }
 
 
- int main(int ac, char** av){
+int compareMax(RationalNumber rn1, RationalNumber rn2){
+  if (rn1.numerator * rn2.denumerator >  rn2.numerator * rn1.denumerator)
+    return 1;
+  else
+    return 0;
+}
+
+int compareMin(RationalNumber rn1, RationalNumber rn2){
+  if (rn1.numerator * rn2.denumerator <  rn2.numerator * rn1.denumerator)
+    return 1;
+  else
+    return 0;
+}
+
+RationalNumber findMin(RationalMatrix* rm, RationalNumber rn, int start, int end){
+  int i;
+  int rows = rm->cols;
+  rn = rm->data[0][1];
+  for(i = start; i < end; i++){
+    if(compareMin(rn, rm->data[i][1]) == 0)
+      rn = rm->data[i][1];
+  }
+  return rn;
+}
+
+RationalNumber findMax(RationalMatrix* rm, RationalNumber rn, int start, int end){
+  int i;
+  int rows = rm->cols;
+  rn = rm->data[0][1];
+  for(i = start; i < end; i++){
+    if(compareMax(rn, rm->data[i][1]) == 0)
+      rn = rm->data[i][1];
+  }
+  return rn;
+}
+
+
+int main(int ac, char** av){
+
   int A[4][2] = {
     {2, -11} ,
-    {-3, 2} ,
+    {-3, -2},
     {1, 3} ,
     {-2, 0}
   };
 
-  int rows = ARRAYSIZE(A);
+  int C[4][1] = {
+    {3} ,
+    {-5} ,
+    {4},
+    {-3}
+  };
+
+/*Här är ett 3x3 system, som ska gå att lösa, vi har problem med minnesallokeringen i while loopen, jag
+  tror det har att göra med näst sista raden rm = new_rm; tror inte det går att skriva över rm så
+  utan man måste använda realloc för att omallokera minne till rm. Men lyckas inte få det att fungera. */
+  // int A[3][3] = {
+  //   {2, 3, 0} ,
+  //   {95, -79,-73},
+  //   {-61, -28, 46}
+  // };
+  //
+  // int C[3][1] = {
+  //   {2} ,
+  //   {-21} ,
+  //   {33}
+  // };
+
+
+  int rows = ARRAYSIZE(A);      //Detta är #define ARRAYSIZE(A) (sizeof(A) / sizeof(A[0])) från rad 3.
   int cols = ARRAYSIZE(A[0]);
+  int counters[2] = {0};        //Skapar en 1x3 vektor för att spara antal pos, neg, zer
+  RationalMatrices *rms = (RationalMatrices *) malloc (sizeof(RationalMatrices));
 
-  //printMatrix(A, rows, cols);
-  RationalMatrix* rm = convertToRationlNumbers(A,rows,cols);
-  //print_rationalMatrix(rm);
-  printf("Första kolonnen innan sortering:\n");
-  printFirstCol(rm);
+/*-------HÄR BÖRJAR ALGORITMEN-------*/
 
-  sort(rm, rows,cols);
+  RationalMatrix* rmA = make_rationalMatrix(rows,cols);
+  RationalMatrix* rmC = make_rationalMatrix(rows,1);
+  RationalMatrix* rm =  make_rationalMatrix(rows,cols + 1);
 
-  printf("Försra kolonnen efter sortering:\n");
-  //rearrangeRationalMatrix(rm, 0, rows);
-  printFirstCol(rm);
+  rmA = convertToRationlNumbers(rows,cols,A);
+  rmC = convertToRationlNumbers(rows,1,C);
 
-     return 0;
+  rm = mergeAandC(rmA, rmC);
+  free(rmA);
+  free(rmC);
+
+  //print_rationalMatrix(rm); // det är väldit skumt men tar man bort denna raden fungerar inte sort??
+  sort(rm, rows, cols, counters, rms);
+  print_rationalMatrix(rms->rm_neg);// det är väldit skumt men tar man bort denna raden fungerar inte sort??
+
+ while(cols > 2){
+    int nzer = counters[0];
+    int nneg = counters[1];
+    int npos = counters[2];
+
+    /*Följer algoritmen från Matlab, slut på olikheter och onändligt antal lösningar */
+
+    if(npos*nneg + nzer <= 0)
+      return 1;
+
+    RationalMatrix* non_zer_rm = make_rationalMatrix(npos+nneg, cols);
+
+    if(npos == 0)
+      non_zer_rm = rms->rm_neg;
+    if(nneg == 0)
+      non_zer_rm = rms->rm_pos;
+    else
+      non_zer_rm = assemRationallMatrices(rms->rm_pos, rms->rm_neg);
+
+    divFirstRow(non_zer_rm);
+    freeFirstCol(non_zer_rm);
+
+    /*eftersom vi ska eliminera en kolonn kan vi ta cols = cols - 1; redan nu
+      så slipper vi kalla på cols -1 i funktionerna nedan */
+    cols = cols - 1;
+
+    RationalMatrix* new_rm = make_rationalMatrix(npos * nneg + nzer, cols);
+    new_rm = eliminateFirstCol(non_zer_rm, rms->rm_zer, npos, nneg, nzer);
+    free(non_zer_rm);
+    sort(new_rm, rows, cols, counters, rms);
+    //Tror vi måste realloca storleken för rm om den ska användas igen.
+    free(rm);
+    RationalMatrix* rm = make_rationalMatrix(npos * nneg + nzer, cols);
+    //RationalMatrix* rm = (RationalMatrix*)realloc(RationalMatrix* rm, rows * cols * sizeof(RationalNumber) + 2*sizeof(int)); //HÄÄR är det lurigt!
+    rm = new_rm;
+    //Vi använder oss bara av rms i algoritmen.
+    free(new_rm);
+    }
+
+    if(cols==2){
+
+      sort(rm, rows, cols, counters, rms);
+
+      int nzer = counters[0];
+      int nneg = counters[1];
+      int npos = counters[2];
+
+      RationalMatrix* non_zer_rm = make_rationalMatrix(npos+nneg , cols);
+      non_zer_rm = assemRationallMatrices(rms->rm_pos, rms->rm_neg);
+
+      divFirstRow(non_zer_rm);
+      freeFirstCol(non_zer_rm);
+
+      cols = cols - 1;
+      RationalMatrix* new_rm = make_rationalMatrix(npos * nneg + nzer, cols);
+      new_rm = eliminateFirstCol(non_zer_rm, rms->rm_zer, npos, nneg, nzer);
+      free(non_zer_rm);
+
+      divFirstRow(new_rm);
+      sort(new_rm, new_rm->rows, cols, counters, rms);
+      nzer = counters[0];
+      nneg = counters[1];
+      npos = counters[2];
+
+
+      RationalNumber B1;// = malloc(sizeof(int)*2);
+      RationalNumber b1;// = malloc(sizeof(int)*2);
+      RationalNumber q_min;// = malloc(sizeof(int)*2);
+
+      B1.numerator = 2147483647; //INT_MAX
+      B1.denumerator = 1;
+      b1.numerator = -2147483647; //INT_MIN
+      b1.denumerator = 1;
+      q_min.numerator = 0; //INT_MIN
+      q_min.denumerator = 1;
+
+      if(npos > 0)
+          B1 = findMin(new_rm, B1, 0, npos);
+      if(nneg > 0)
+        b1 = findMax(new_rm, B1, npos, npos + nneg);
+      if (nzer > 0)
+        q_min = findMin(new_rm, q_min, npos + nneg, npos + nneg + nzer);
+
+      if (q_min.numerator < 0)
+        printf("0 \n");
+
+      if(compareMin(b1,B1) == 1)
+        printf("1 \n");
+      else
+        printf("0 \n");
+
+        free(new_rm);
+        //free(B1);
+        //free(b1);
+        //free(q_min);
+    }
+    free(rm);
+    free(rms);
+/*------HÄR SLUTAR ALGORITMEN------*/
+
+
+
+
+    // printMatrix(rows, cols, A);
+    // printf("\n");
+    // printMatrix(rows, 1 , C);
+    // printf("\n");
+    //
+    // RationalMatrix* rmA = convertToRationlNumbers(rows,cols,A);
+    // print_rationalMatrix(rmA);
+    // printf("\n");
+    // RationalMatrix* rmC = convertToRationlNumbers(rows,1,C);
+    // print_rationalMatrix(rmC);
+    // printf("\n");
+    //
+    // RationalMatrix* rm = mergeAandC(rmA, rmC);
+    // printf("\n");
+    // print_rationalMatrix(rm);
+    // sort(rm, rows, cols, counters, rms);
+    // printf("\n");
+    // int nzer = counters[0];
+    // int nneg = counters[1];
+    // int npos = counters[2];
+    //
+    // print_rationalMatrix(rm);
+    // printf("\n");
+    // RationalMatrix* new_rm = assemRationallMatrices(rms->rm_pos,rms->rm_neg);
+    // print_rationalMatrix(new_rm);
+    // printf("\n");
+    // divFirstRow(new_rm);
+    // print_rationalMatrix(new_rm);
+    // printf("\n");
+    // freeFirstCol(new_rm);
+    //
+    // print_rationalMatrix(new_rm);
+    // printf("\n");
+    // RationalMatrix* newnew_rm = eliminateFirstCol(new_rm, rms->rm_zer, npos, nneg, nzer);
+    // print_rationalMatrix(newnew_rm);
+    // printf("\n");
+
 }
