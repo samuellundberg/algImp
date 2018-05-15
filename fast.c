@@ -486,7 +486,8 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
 
 	  RationalMatrix* rm =  make_rationalMatrix(rows,cols + 1);
 	  rm = mergeAandC(rma, rmc); 	//gör så merge tar icke-rat a och c
-
+		free(rma);
+		free(rmc);
 	  //print_rationalMatrix(rm); // det är väldit skumt men tar man bort denna raden fungerar inte sort??
 	  sort(rm, rows, counters, rms);
 	  //print_rationalMatrix(rms->rm_neg);// det är väldit skumt men tar man bort denna raden fungerar inte sort??
@@ -525,14 +526,15 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
 	    sort(new_rm, rows, counters, rms);
 	    //Tror vi måste realloca storleken för rm om den ska användas igen.
 	    free(rm);
-	    RationalMatrix* rm = make_rationalMatrix(npos * nneg + nzer, cols);
+	    //RationalMatrix* rm = make_rationalMatrix(npos * nneg + nzer, cols);
 	    //RationalMatrix* rm = (RationalMatrix*)realloc(RationalMatrix* rm, rows * cols * sizeof(RationalNumber) + 2*sizeof(int)); //HÄÄR är det lurigt!
 	    rm = new_rm;
 	    //Vi använder oss bara av rms i algoritmen.
-	    free(new_rm);
+	    //free(new_rm);
     }
     //sort(rm, rows, counters, rms);//onödig rad?
     //Nu har vi bara två kolloner kvar så dags att bedömma dem
+
     int nzer = counters[0];
     int nneg = counters[1];
     int npos = counters[2];
@@ -541,6 +543,10 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
     non_zer_rm = assemRationallMatrices(rms->rm_pos, rms->rm_neg);
     RationalMatrix* zer_rm = make_rationalMatrix(nzer, cols);
     zer_rm = rms->rm_zer;
+
+		free(rm);
+		free(rms);
+		//free(new_rm);
 
     if(npos+nneg > 0)
       divFirstRow(non_zer_rm);
@@ -567,11 +573,11 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
     if(npos > 0)
       B1 = findMin(non_zer_rm, B1, 0, npos);
     if(nneg > 0)
-      b1 = findMax(non_zer_rm, B1, npos, npos + nneg);
+      b1 = findMax(non_zer_rm, b1, npos, npos + nneg);
     if (nzer > 0)
       q_min = findMin(zer_rm, q_min, 0, nzer);
 
-    if (q_min.numerator < 0)
+    if (q_min.numerator <= 0)
       return 0;
 
     if(compareMin(b1,B1) == 1)
@@ -585,6 +591,5 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
       //free(q_min);
 
 		//Om vi redan har returnat, går vi fortfarande hit och freear?
-    free(rm);
-    free(rms);
+
 }
