@@ -48,16 +48,6 @@ int isRationalNumberZero(RationalNumber rn){
   return 0;
 }
 
-/*Kollar om ett rationellt tal är negativt.
-  Returnerar 1 om neg och 0 annars*/
-int isRationalNumberNegative(RationalNumber rn){
-  if(rn.numerator > 0 && rn.denumerator < 0)
-    return 1;
-  else if(rn.numerator < 0 && rn.denumerator > 0)
-    return 1;
-  else
-    return 0;
-}
 /*Kollar om ett rationellt tal är positivt.
   Returnerar 1 om pos och 0 annars*/
 int isRationalNumberPositive(RationalNumber rn){
@@ -283,10 +273,10 @@ void sort(RationalMatrix* rm, int rows, int *counters, RationalMatrices *rms){
   for( i = 0; i < rows; i++){
     if (rm->data[i][0].numerator == 0)
       zercount++;
-    else if (isRationalNumberNegative(rm->data[i][0]))
-      negcount++;
-    else
+    else if (isRationalNumberPositive(rm->data[i][0]))
       poscount++;
+    else
+      negcount++;
   }
   //Skapar/allocerar minne för tre stycken matriser att lägga pos, neg och zer elementen i
   int rm_cols = rm->cols;
@@ -304,13 +294,13 @@ void sort(RationalMatrix* rm, int rows, int *counters, RationalMatrices *rms){
       rm_zer->data[j] = rm->data[i];
       j++;
     }
-    else if(isRationalNumberNegative(temp)){
-      rm_neg->data[k] = rm->data[i];
-      k++;
+    else if(isRationalNumberPositive(temp)){
+			rm_pos->data[l] = rm->data[i];
+      l++;
     }
     else {
-      rm_pos->data[l] = rm->data[i];
-      l++;
+			rm_neg->data[k] = rm->data[i];
+      k++;
     }
   }
   rms->rm_zer = rm_zer;
@@ -334,51 +324,38 @@ void sort(RationalMatrix* rm, int rows, int *counters, RationalMatrices *rms){
   counters[2] = poscount;
 }
 
+// return 1 om rn1>rn2, annars 0
+int compare(RationalNumber rn1, RationalNumber rn2){
+	float a = rn1.numerator/rn1.denumerator;
+	float b = rn2.numerator/rn2.denumerator;
 
-int compareMax(RationalNumber rn1, RationalNumber rn2){
-	if(isRationalNumberPositive(rn1) == 1 && isRationalNumberPositive(rn2) == 1){
-	  if (abs(rn1.numerator * rn2.denumerator) >  abs(rn2.numerator * rn1.denumerator))
-	    return 1;
-	  else
-	    return 0;
-	}
-	if(isRationalNumberNegative(rn1) == 1 && isRationalNumberNegative(rn2) == 1){
-			if (abs(rn1.numerator * rn2.denumerator) <  abs(rn2.numerator * rn1.denumerator))
-			return 1;
-	  else
-	    return 0;
-	}
-	if(isRationalNumberPositive(rn1))
+	if(a>b)
 		return 1;
-
-	return 0;
-
-}
-//1 om rn1 < rn2
-int compareMin(RationalNumber rn1, RationalNumber rn2){
-	if (isRationalNumberPositive(rn1) == 1 && isRationalNumberPositive(rn2) == 1){
-		if (abs(rn1.numerator * rn2.denumerator) <  abs(rn2.numerator * rn1.denumerator))
-			return 1;
-		else
-			return 0;
-	}
-	if (isRationalNumberNegative(rn1) == 1 && isRationalNumberNegative(rn2) == 1){
-		if (abs(rn1.numerator * rn2.denumerator) >  abs(rn2.numerator * rn1.denumerator))
-			return 1;
-		else
-			return 0;
-	}
-	if (isRationalNumberPositive(rn1))
+	else
 		return 0;
+	//if(isRationalNumberPositive(rn1) == 1 && isRationalNumberPositive(rn2) == 1){
+	//   if (abs(rn1.numerator * rn2.denumerator) >  abs(rn2.numerator * rn1.denumerator))
+	//     return 1;
+	//   else
+	//     return 0;
+	// }
+	// if(isRationalNumberPositive(rn1) == 0 && isRationalNumberPositive(rn2) == 0){
+	// 		if (abs(rn1.numerator * rn2.denumerator) <  abs(rn2.numerator * rn1.denumerator))
+	// 		return 1;
+	//   else
+	//     return 0;
+	// }
+	// if(isRationalNumberPositive(rn1)==1)
+	// 	return 1;
+	//
+	// return 0;
 
-	return 1;
 }
 
 RationalNumber findMin(RationalMatrix* rm, RationalNumber rn, int start, int end){
   int i;
-  rn = rm->data[0][1];
   for(i = start; i < end; i++){
-    if(compareMin(rn, rm->data[i][1]) == 0)
+    if(compare(rn, rm->data[i][1]) == 1)
       rn = rm->data[i][1];
   }
   return rn;
@@ -386,9 +363,8 @@ RationalNumber findMin(RationalMatrix* rm, RationalNumber rn, int start, int end
 
 RationalNumber findMax(RationalMatrix* rm, RationalNumber rn, int start, int end){
   int i;
-  rn = rm->data[0][1];
   for(i = start; i < end; i++){
-    if(compareMax(rn, rm->data[i][1]) == 0)
+    if(compare(rn, rm->data[i][1]) == 0)
       rn = rm->data[i][1];
   }
   return rn;
@@ -404,10 +380,11 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
 		RationalMatrix* rma =  make_rationalMatrix(rows, cols);
 		RationalMatrix* rmc =  make_rationalMatrix(rows, 1);
 		rma = convertToRationlNumbers(rma, rows, cols, a);
-		rmc = convertC(rmc, rows, c);
+		rmc = convertToRationlNumbers(rmc, rows, 1, c);
 
 	  RationalMatrix* rm =  make_rationalMatrix(rows,cols + 1);
 	  rm = mergeAandC(rm, rma, rmc);
+		cols = cols + 1;
     free(rma);
     free(rmc);
 
@@ -435,16 +412,16 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
   	    freeFirstCol(non_zer_rm);
       }
 	    cols = cols - 1;
-
-	    RationalMatrix* new_rm = make_rationalMatrix(npos * nneg + nzer, cols);
+      rows = npos * nneg + nzer;
+	    RationalMatrix* new_rm = make_rationalMatrix(rows, cols);
 	    new_rm = eliminateFirstCol(new_rm, non_zer_rm, rms->rm_zer, npos, nneg, nzer);
-
+      free(non_zer_rm);
       free(rms->rm_neg);
       free(rms->rm_pos);
       free(rms->rm_zer);
       sort(new_rm, rows, counters, rms);
 	    rm = new_rm;
-	    free(new_rm);
+	    //free(new_rm);
     }
     //Nu har vi bara två kolloner kvar så dags att bedömma dem
     int nzer = counters[0];
@@ -467,13 +444,13 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
     B1.denumerator = 1;
     b1.numerator = -2147483647;   //INT_MIN
     b1.denumerator = 1;
-    q_min.numerator = 0;          //INT_MIN
+    q_min.numerator = 2147483647;          //INT_MIN
     q_min.denumerator = 1;
 
     if(npos > 0)
       B1 = findMin(non_zer_rm, B1, 0, npos);
     if(nneg > 0)
-      b1 = findMax(non_zer_rm, B1, npos, npos + nneg);
+      b1 = findMax(non_zer_rm, b1, npos, npos + nneg);
     if (nzer > 0)
       q_min = findMin(zer_rm, q_min, 0, nzer);
 
@@ -484,7 +461,7 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
     if (q_min.numerator <= 0)
       return 0;
 
-    if(compareMin(b1,B1) == 1)
+    if(compare(B1, b1) == 1)
       return 1;
     else
       return 0;
