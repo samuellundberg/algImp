@@ -81,11 +81,15 @@ RationalNumber reduce(RationalNumber r){
   int mgn;
   RationalNumber newr;
   if(a == 0){
-    b = 1;
+    newr.numerator = 0;
+    newr.denumerator = 1;
+    return newr;
+
   }
   else if(b == 0){
-    a = 2147483647;
-    b = 1;
+    newr.numerator = 2147483647;
+    newr.denumerator = 1;
+    return newr;
   }
   int c = a % b;
 
@@ -459,11 +463,11 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
     RationalNumber b1;// = malloc(sizeof(int)*2);
     RationalNumber q_min;// = malloc(sizeof(int)*2);
 
-    B1.numerator = 2147483647; //INT_MAX
+    B1.numerator = 2147483647;    //INT_MAX
     B1.denumerator = 1;
-    b1.numerator = -2147483647; //INT_MIN
+    b1.numerator = -2147483647;   //INT_MIN
     b1.denumerator = 1;
-    q_min.numerator = 0; //INT_MIN
+    q_min.numerator = 0;          //INT_MIN
     q_min.denumerator = 1;
 
     if(npos > 0)
