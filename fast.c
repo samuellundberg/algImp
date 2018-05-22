@@ -37,8 +37,8 @@
 
 //En strukt för hur rationella tal beskrivs
 typedef struct RationalNumber{
-  int numerator;
-  int denumerator;
+  long long numerator;
+  long long denumerator;
 }RationalNumber;
 
 int isRationalNumberZero(RationalNumber rn){
@@ -66,9 +66,9 @@ int bp(int a, int b){
 
 /* Räkneregler med rationella tal, från lab1*/
 RationalNumber reduce(RationalNumber r){
-  int a = r.numerator;
-  int b = r.denumerator;
-  int mgn;
+  long long a = r.numerator;
+  long long b = r.denumerator;
+  long long mgn;
   RationalNumber newr;
   if(a == 0){
     newr.numerator = 0;
@@ -172,8 +172,8 @@ RationalMatrix* convertToRationlNumbers(RationalMatrix* rm, int rows, int cols, 
 RationalMatrix* convertC(RationalMatrix* rm, int rows, signed char vector[]){
   int i;
   for(i = 0; i < rows; i++){
-          rm->data[i][1].numerator = vector[i];
-          rm->data[i][1].denumerator = 1;
+          rm->data[i][0].numerator = vector[i];
+          rm->data[i][0].denumerator = 1;
   }
   return rm;
 }
@@ -252,6 +252,18 @@ RationalMatrix* mergeAandC(RationalMatrix* AC, RationalMatrix* A, RationalMatrix
   return AC;
 }
 
+void mergeAandC2(RationalMatrix* AC, int rows, int cols, signed char A[rows][cols], signed char C[rows]){
+  int i,j;
+  for(i = 0; i < rows; i++){
+    AC->data[i][cols].numerator = C[i];
+    AC->data[i][cols].denumerator = 1;
+    for(j = 0; j < cols; j++){
+      AC->data[i][j].numerator = A[i][j];
+      AC->data[i][j].denumerator = 1;
+    }
+  }
+}
+
 typedef struct RationalMatrices{
   RationalMatrix* rm_zer;
   RationalMatrix* rm_neg;
@@ -326,13 +338,14 @@ void sort(RationalMatrix* rm, int rows, int *counters, RationalMatrices *rms){
 
 // return 1 om rn1>rn2, annars 0
 int compare(RationalNumber rn1, RationalNumber rn2){
-	float a = rn1.numerator/rn1.denumerator;
-	float b = rn2.numerator/rn2.denumerator;
-
+	float a = ((float)rn1.numerator)/rn1.denumerator;
+	float b = ((float)rn2.numerator)/rn2.denumerator;
 	if(a>b)
+  //printf("a:%f\nb:%f",a,b);
 		return 1;
 	else
 		return 0;
+}
 	//if(isRationalNumberPositive(rn1) == 1 && isRationalNumberPositive(rn2) == 1){
 	//   if (abs(rn1.numerator * rn2.denumerator) >  abs(rn2.numerator * rn1.denumerator))
 	//     return 1;
@@ -350,7 +363,7 @@ int compare(RationalNumber rn1, RationalNumber rn2){
 	//
 	// return 0;
 
-}
+
 
 RationalNumber findMin(RationalMatrix* rm, RationalNumber rn, int start, int end){
   int i;
@@ -377,17 +390,19 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
 	  int counters[3] = {0};        //Skapar en 1x3 vektor för att spara antal pos, neg, zer
 
 	/*-------HÄR BÖRJAR ALGORITMEN-------*/
-		RationalMatrix* rma =  make_rationalMatrix(rows, cols);
-		RationalMatrix* rmc =  make_rationalMatrix(rows, 1);
-		rma = convertToRationlNumbers(rma, rows, cols, a);
-		rmc = convertToRationlNumbers(rmc, rows, 1, c);
-
-	  RationalMatrix* rm =  make_rationalMatrix(rows,cols + 1);
-	  rm = mergeAandC(rm, rma, rmc);
-		cols = cols + 1;
-    free(rma);
-    free(rmc);
-
+		// RationalMatrix* rma =  make_rationalMatrix(rows, cols);
+		// RationalMatrix* rmc =  make_rationalMatrix(rows, 1);
+		// rma = convertToRationlNumbers(rma, rows, cols, a);
+		// rmc = convertC(rmc, rows, c);
+    //
+	  // RationalMatrix* rm =  make_rationalMatrix(rows,cols + 1);
+	  // rm = mergeAandC(rm, rma, rmc);
+		// cols = cols + 1;
+    // free(rma);
+    // free(rmc);
+    RationalMatrix* rm =  make_rationalMatrix(rows,cols + 1);
+    mergeAandC2(rm, rows, cols, a, c);
+    cols = cols + 1;
     RationalMatrices *rms = (RationalMatrices *) malloc (sizeof(RationalMatrices));
 	  sort(rm, rows, counters, rms);
 
