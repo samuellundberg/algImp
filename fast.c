@@ -3,38 +3,6 @@
 #include <stdlib.h> /* qsort */
 #define ARRAYSIZE(A) (sizeof(A) / sizeof(A[0]))
 
-
-/* --- innehållsförteckning---*/
-/*  1. printMatrix (skriver ut en int matris)
-    2. struct RationalNumber (sparar rationella tal som numerator och denumerator)
-      2.1 isRationalNumberZero (kollar om RationalNumber är = 0)
-      2.2 isRationalNumberNegative (kollar om RationalNumber är < 0)
-      2.3 isRationalNumberPositive (kollar om RationalNumber är > 0)
-      2.4 reduce (reducerar RationalNumber till minsta nämnare)
-      2.5 addq (från lab1)
-      2.6 subq (från lab1)
-      2.7 multq (från lab1)
-      2.8 divq (från lab1)
-    3. struct RationalMatrix (sparar antal rader och kolonner samt en pekarvektor till en pekarvektor som pekar på ett Rationellt tal. Alltså en matris med rationella tal)
-      3.1 make_rationalMatrix (allokerar minne i heapen till en rationell matris)
-      3.2 print_rationalMatrix (Skriver ut en rationell matris)
-      3.3 convertToRationlNumbers (Gör om en intMatris till en matris med rationella tal)
-      3.4 printFirstCol (Skirver bara ut första kolonnen i matrisen, brukar inte använda denna)
-      3.5 assemRationallMatrices(Jämför varje pos rad med varje neg rad i 2 rationella matriser när vi ställer upp olikheterna för pos och neg)
-      3.6 divFirstRow (dividerar alla rationella tal i en rad med första rationella talet i raden, gör detta för en hel matris)
-      3.7 freeFirstCol (byter tecken på alla rationella tal i en rad utom det första, vilket motsvara att flytta till andra sidan likhetstecknet)
-      3.8 eliminateFirstCol (tar bort första kolonnen ut matrisen)
-      3.9 mergeAandC (Lägger ihop matriserna A och C)
-    4. struct RationalMatrices (Är till för att spara de tre matriserna som har pos, neg eller zer i första kolonnen)
-      4.1 sort (Sorterar talen så poitiva på toppen sen negativa och sist nollelement, ger de tre matriserna samt antal npos nneg och nzer)'
-    5. compareMax (Jämför 2 rationella tal och returnerar 1 om det första man skickar in är störst)
-       compareMin (Jämför 2 rationella tal och returnerar 1 om det första man skickar in är minst)
-    6. findMin (Hittar det minsta talet i kolonn 2 i en rationell matris, används för att hitta B1)
-       findMax (Hittar det största talet i kolonn 2 i en rationell matris, används för att hitta b1)*/
-
-/* Steg 1 är att ändra indatan från en int matris till en
-   matris med rationella tal. */
-
 //En strukt för hur rationella tal beskrivs
 typedef struct RationalNumber{
   long long numerator;
@@ -147,6 +115,15 @@ RationalMatrix* make_rationalMatrix(int n_rows, int n_cols){
   }
   rm->data = data;
   return rm;
+}
+
+void free_rationalMatrix(RationalMatrix* rm){
+  int i;
+  int rows = rm->rows;
+  for (i=0; i<rows; i++)
+      free(rm->data[i]);
+
+  free(rm);
 }
 
 RationalMatrix* convertToRationlNumbers(RationalMatrix* rm, int rows, int cols, signed char matrix[][cols]){
@@ -293,10 +270,10 @@ void sort(RationalMatrix* rm, int rows, int *counters, RationalMatrices *rms){
   }
   //Skapar/allocerar minne för tre stycken matriser att lägga pos, neg och zer elementen i
   int rm_cols = rm->cols;
+
   RationalMatrix* rm_zer = make_rationalMatrix(zercount, rm_cols);
   RationalMatrix* rm_neg = make_rationalMatrix(negcount, rm_cols);
   RationalMatrix* rm_pos = make_rationalMatrix(poscount, rm_cols);
-//Lägger in pos, neg och zer rader i sina respektive matriser
 	int j = 0;
 	int k = 0;
 	int l = 0;
@@ -319,9 +296,6 @@ void sort(RationalMatrix* rm, int rows, int *counters, RationalMatrices *rms){
   rms->rm_zer = rm_zer;
   rms->rm_neg = rm_neg;
   rms->rm_pos = rm_pos;
-  //free(rm_zer);
-  //free(rm_neg);
-  //free(rm_pos);
 
   //Lägger in elementen igen i matrisen rm, fast i rätt ordning
   for(i = 0; i<poscount; i++)
@@ -347,24 +321,6 @@ int compare(RationalNumber rn1, RationalNumber rn2){
 	else
 		return 0;
 }
-	//if(isRationalNumberPositive(rn1) == 1 && isRationalNumberPositive(rn2) == 1){
-	//   if (abs(rn1.numerator * rn2.denumerator) >  abs(rn2.numerator * rn1.denumerator))
-	//     return 1;
-	//   else
-	//     return 0;
-	// }
-	// if(isRationalNumberPositive(rn1) == 0 && isRationalNumberPositive(rn2) == 0){
-	// 		if (abs(rn1.numerator * rn2.denumerator) <  abs(rn2.numerator * rn1.denumerator))
-	// 		return 1;
-	//   else
-	//     return 0;
-	// }
-	// if(isRationalNumberPositive(rn1)==1)
-	// 	return 1;
-	//
-	// return 0;
-
-
 
 RationalNumber findMin(RationalMatrix* rm, RationalNumber rn, int start, int end){
   int i;
@@ -391,16 +347,7 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
 	  int counters[3] = {0};        //Skapar en 1x3 vektor för att spara antal pos, neg, zer
 
 	/*-------HÄR BÖRJAR ALGORITMEN-------*/
-		// RationalMatrix* rma =  make_rationalMatrix(rows, cols);
-		// RationalMatrix* rmc =  make_rationalMatrix(rows, 1);
-		// rma = convertToRationlNumbers(rma, rows, cols, a);
-		// rmc = convertC(rmc, rows, c);
-    //
-	  // RationalMatrix* rm =  make_rationalMatrix(rows,cols + 1);
-	  // rm = mergeAandC(rm, rma, rmc);
-		// cols = cols + 1;
-    // free(rma);
-    // free(rmc);
+
     RationalMatrix* rm =  make_rationalMatrix(rows,cols + 1);
     mergeAandC2(rm, rows, cols, a, c);
     cols = cols + 1;
@@ -431,7 +378,8 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
       rows = npos * nneg + nzer;
 	    RationalMatrix* new_rm = make_rationalMatrix(rows, cols);
 	    new_rm = eliminateFirstCol(new_rm, non_zer_rm, rms->rm_zer, npos, nneg, nzer);
-      free(non_zer_rm);
+
+      free_rationalMatrix(non_zer_rm);
       free(rms->rm_neg);
       free(rms->rm_pos);
       free(rms->rm_zer);
@@ -470,8 +418,8 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
     if (nzer > 0)
       q_min = findMin(zer_rm, q_min, 0, nzer);
 
-    free(zer_rm);
-    free(rm);
+    free_rationalMatrix(zer_rm);
+    free_rationalMatrix(rm);
     free(rms);
 
     if (q_min.numerator <= 0)
