@@ -74,25 +74,12 @@ RationalNumber reduce(RationalNumber r){
     newr.numerator = 0;
     newr.denumerator = 1;
     return newr;
-
-  }
-  else if(b == 0){
-    newr.numerator = 2147483647;
-    newr.denumerator = 1;
-    return newr;
   }
   int c = a % b;
-
-  if(c==0){
-    a = a/b;
-    b = 1;
-  }
-
   if (c < 0){
     c = -c;
     a = -a;
   }
-
   while(c != 0)
   {
       a = b;
@@ -102,6 +89,10 @@ RationalNumber reduce(RationalNumber r){
   mgn = b;
   newr.numerator = r.numerator/mgn;
   newr.denumerator = r.denumerator/mgn;
+  if(newr.denumerator < 0){
+    newr.numerator = -newr.numerator;
+    newr.denumerator = -newr.denumerator;
+  }
   return newr;
 
 };
@@ -233,11 +224,21 @@ RationalMatrix* eliminateFirstCol(RationalMatrix* new_rm, RationalMatrix* old_rm
     for(i = 0; i < nzer; i++){
       for(j = 1; j < cols; j++){
         RationalNumber rn = rm_zer->data[i][j];
-        rn.numerator = - rn.numerator;
+        //rn.numerator = - rn.numerator;
         new_rm->data[npos * nneg + i][j-1] = rn;
       }
     }
   }
+
+  //testar här
+  int r = new_rm->rows;
+  int c = new_rm->cols;
+  for (i = 0; i < r; i++){
+    for(j = 0; j < c-1; j++){
+      new_rm->data[i][j].numerator = - new_rm->data[i][j].numerator;
+    }
+  }
+
   return new_rm;
 }
 
