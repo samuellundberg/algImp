@@ -70,13 +70,14 @@ typedef struct RationalMatrix{
   struct RationalNumber** data;     // En pekare till en vektor med rows perkare till vektorer; där varje vektor innehåller cols rationalNumber
 }RationalMatrix;
 
-RationalMatrix* make_rationalMatrix(int n_rows, int n_cols){
-  RationalMatrix* rm = malloc(sizeof(RationalMatrix));
-  rm->rows = n_rows;
-  rm->cols = n_cols;
-  RationalNumber** data = malloc(sizeof(RationalNumber*) * n_rows);
-  for (int i = 0; i < n_rows; i++){
-    data[i] = calloc(n_cols, sizeof(RationalNumber));
+RationalMatrix* make_rationalMatrix(int rows, int cols){
+  RationalMatrix* rm = (RationalMatrix *)malloc(sizeof(RationalMatrix));
+  rm->rows = rows;
+  rm->cols = cols;
+  RationalNumber** data = (RationalNumber**)malloc(sizeof(RationalNumber*) * rows);
+  for (int i = 0; i < rows; i++){
+    data[i] = malloc(sizeof(RationalNumber) * cols);
+    //data[i] = calloc(n_cols, sizeof(RationalNumber));
   }
   rm->data = data;
   return rm;
@@ -84,9 +85,10 @@ RationalMatrix* make_rationalMatrix(int n_rows, int n_cols){
 
 void free_rationalMatrix(RationalMatrix* rm){
 	int rows = rm->rows;
-	for (int i = 0; i<rows;i++){
+  //RationalNumber** data = rm->data;
+	for (int i = 0; i<rows; i++)
 		free(rm->data[i]);
-	}
+
 	//free(rm->data);
 	free(rm);
 }
@@ -155,9 +157,9 @@ void sort(RationalMatrix* rm, int rows, int cols, int *counters){
   for(i = 0; i<zercount; i++)
     rm->data[poscount + negcount + i] = rm_zer->data[i];
 
-	// free_rationalMatrix(rm_zer);
-	// free_rationalMatrix(rm_pos);
-	// free_rationalMatrix(rm_neg);
+	free(rm_zer);
+	free(rm_pos);
+	free(rm_neg);
 }
 
 RationalMatrix* assemRationallMatrices(RationalMatrix* new_rm, RationalMatrix* rm, int *counters){
@@ -290,14 +292,15 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
   	  freeFirstCol(non_zer_rm);
     }
 
-		cols = cols - 1;
-		rows = npos * nneg + nzer;
-		RationalMatrix* new_rm = make_rationalMatrix(rows, cols);
+    RationalMatrix* temp = rm;
+    cols = cols - 1;
+    rows = npos * nneg + nzer;
+    RationalMatrix* new_rm = make_rationalMatrix(rows, cols);
 		new_rm = eliminateFirstCol(new_rm, non_zer_rm, rm, npos, nneg, nzer);
-		//free_rationalMatrix(non_zer_rm);
-		//free_rationalMatrix(rm);
-		sort(new_rm,rows,cols,counters);
+		free_rationalMatrix(non_zer_rm);
+    sort(new_rm,rows,cols,counters);
 		rm = new_rm;
+    free(temp);
 		}
 
 		int nzer = counters[0];
@@ -329,7 +332,7 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
       q_min = findMin(rm, q_min, nneg+npos, nneg+npos+nzer);
 
 		//free_rationalMatrix(rm);
-		//free_rationalMatrix(non_zer_rm);
+		free_rationalMatrix(non_zer_rm);
 
 		if (q_min.numerator <= 0)
 			return 0;
