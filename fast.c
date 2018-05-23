@@ -85,12 +85,19 @@ RationalMatrix* make_rationalMatrix(int rows, int cols){
 
 void free_rationalMatrix(RationalMatrix* rm){
 	int rows = rm->rows;
-  //RationalNumber** data = rm->data;
-	for (int i = 0; i<rows; i++)
-		free(rm->data[i]);
+  RationalNumber** data = rm->data;
+  for (int i = 0; i<rows; i++)
+	 	free(data[i]);
 
-	//free(rm->data);
+	free(rm->data);
 	free(rm);
+}
+
+void free_rationalMatrixdata(RationalMatrix* rm){
+  int rows = rm->rows;
+  RationalNumber** data = rm->data;
+  for (int i = 0; i<rows; i++)
+    free(data[i]);
 }
 
 void mergeAandC2(RationalMatrix* AC, int rows, int cols, signed char A[rows][cols], signed char C[rows]){
@@ -127,12 +134,15 @@ void sort(RationalMatrix* rm, int rows, int cols, int *counters){
   RationalMatrix* rm_zer = make_rationalMatrix(zercount, cols);
   RationalMatrix* rm_neg = make_rationalMatrix(negcount, cols);
   RationalMatrix* rm_pos = make_rationalMatrix(poscount, cols);
-//Lägger in pos, neg och zer rader i sina respektive matriser
+  free_rationalMatrixdata(rm_zer);
+  free_rationalMatrixdata(rm_pos);
+  free_rationalMatrixdata(rm_neg);
+  //Lägger in pos, neg och zer rader i sina respektive matriser
 	int j = 0;
 	int k = 0;
 	int l = 0;
   for(int i = 0; i < rows; i++){
-    RationalNumber temp = rm->data[i][0];
+    RationalNumber temp = rm->data[i][0]; //KAN BEHÖVA MALLOCAS
 
     if(temp.numerator == 0){
       rm_zer->data[j] = rm->data[i];
@@ -146,6 +156,7 @@ void sort(RationalMatrix* rm, int rows, int cols, int *counters){
 			rm_neg->data[k] = rm->data[i];
       k++;
     }
+
   }
 
   //Lägger in elementen igen i matrisen rm, fast i rätt ordning
@@ -156,10 +167,15 @@ void sort(RationalMatrix* rm, int rows, int cols, int *counters){
     //Kan vara så att vi kan skita i den här loopen kommer inte ihåg ifall vi ändå ska ta bort 0elementen dirrekt efter detta
   for(i = 0; i<zercount; i++)
     rm->data[poscount + negcount + i] = rm_zer->data[i];
-
+  if (zercount>0)
 	free(rm_zer);
+  free(rm_zer->data);
+  if (poscount>0)
 	free(rm_pos);
+  free(rm_pos->data);
+  if (negcount>0)
 	free(rm_neg);
+  free(rm_neg->data);
 }
 
 RationalMatrix* assemRationallMatrices(RationalMatrix* new_rm, RationalMatrix* rm, int *counters){
@@ -217,7 +233,7 @@ RationalMatrix* eliminateFirstCol(RationalMatrix* new_rm, RationalMatrix* non_ze
   int r = new_rm->rows;
   int c = new_rm->cols;
   for (i = 0; i < r; i++){
-    for(j = 0; j < c-1; j++){
+    for(j = 1; j < c-1; j++){
       new_rm->data[i][j].numerator = - new_rm->data[i][j].numerator;
     }
   }
@@ -292,15 +308,15 @@ bool fm(size_t rows, size_t cols, signed char a[rows][cols], signed char c[rows]
   	  freeFirstCol(non_zer_rm);
     }
 
-    RationalMatrix* temp = rm;
+    //RationalMatrix* temp = rm;
     cols = cols - 1;
     rows = npos * nneg + nzer;
     RationalMatrix* new_rm = make_rationalMatrix(rows, cols);
 		new_rm = eliminateFirstCol(new_rm, non_zer_rm, rm, npos, nneg, nzer);
 		free_rationalMatrix(non_zer_rm);
     sort(new_rm,rows,cols,counters);
-		rm = new_rm;
-    free(temp);
+		rm= new_rm;
+    //free_rationalMatrix(temp);
 		}
 
 		int nzer = counters[0];
